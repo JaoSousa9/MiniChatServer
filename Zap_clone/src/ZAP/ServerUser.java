@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 public class ServerUser {
 
     Socket mySocket;
-
     ExecutorService executorService = Executors.newFixedThreadPool(2);
 
     public static void main(String[] args) {
@@ -61,8 +60,6 @@ public class ServerUser {
 
 
     public class ClientHandler implements Runnable{
-
-
         @Override
         public void run() {
             write();
