@@ -19,15 +19,18 @@ public class ServerUser {
 
     private void connect(){
         try {
+            //Initializes the connection to the specific server
             mySocket = new Socket(InetAddress.getLocalHost(), ChatServer.DEFAULT_PORT );
             ClientHandler clientHandler = new ClientHandler();
+            //Now, while this Client is connected to the server he will be able to write while other clients are writing
             executorService.submit(clientHandler);
-                read();
+            read();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    //This method receives the server messages and prints them to the client
     private void read(){
         while (mySocket.isConnected()){
             try {
@@ -40,6 +43,7 @@ public class ServerUser {
         }
     }
 
+    //Sends the messages to the server to then deal with them
     private void write(){
         while (mySocket.isBound()){
             try {

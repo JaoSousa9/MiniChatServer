@@ -13,6 +13,14 @@ public class ClientHandler implements Runnable {
         this.client = client;
     }
 
+    public ChatServer getChatServer() {
+        return chatServer;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
     @Override
     public void run() {
         chatServer.sendMessage(client);

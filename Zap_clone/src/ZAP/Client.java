@@ -1,14 +1,12 @@
 package ZAP;
 
-import java.net.InetAddress;
 import java.net.Socket;
 
 public class Client {
     private final Socket clientSocket;
-    private final String name;
-    public Client(Socket clientSocket, String name) {
+    private String name;
+    public Client(Socket clientSocket) {
         this.clientSocket = clientSocket;
-        this.name = name;
     }
 
     public Socket getClientSocket() {
@@ -17,5 +15,9 @@ public class Client {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

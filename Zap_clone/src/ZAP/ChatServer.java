@@ -26,6 +26,7 @@ public class ChatServer {
 
         try {
             chatServer.serverSocket = new ServerSocket(DEFAULT_PORT);
+            System.out.println("Server was Initialized");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -38,12 +39,12 @@ public class ChatServer {
         try {
             while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
-                //Reads Name of the User
-                String name = getName(socket);
+                System.out.println("A User connected to the Server");
+                Client client = new Client(socket);
 
-                Client client = new Client(socket, name);
-                clientList.add(client);
-
+                //In case a client connects and leaves the server
+                client.setName("No attributed Name");
+                
                 ClientHandler clientHandler = new ClientHandler(client, this);
                 cachedPool.submit(clientHandler);
             }
@@ -55,18 +56,11 @@ public class ChatServer {
 
     private String getName(Socket socket) {
         try {
-            DataOutputStream nameRequest = null;
-            nameRequest = new DataOutputStream(socket.getOutputStream());
+            DataOutputStream nameRequest = new DataOutputStream(socket.getOutputStream());;
             nameRequest.writeBytes("What's your name? \n");
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String name = in.readLine();
+            return in.readLine();
 
-            if (checkNameExists(name)) {
-                nameAlreadyExists(socket);
-                return getName(socket);
-            }else {
-                return name;
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -76,13 +70,23 @@ public class ChatServer {
         DataOutputStream nameAlreadyExists = null;
         try {
             nameAlreadyExists = new DataOutputStream(socket.getOutputStream());
-            nameAlreadyExists.writeBytes("Name already exists, plase choose another one! \n");
+            nameAlreadyExists.writeBytes("Name already exists, please choose another one! \n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void sendMessage(Client sender) {
+
+        String name = getName(sender.getClientSocket());
+        sender.setName(name);
+
+        if (checkNameExists(name)) {
+            nameAlreadyExists(sender.getClientSocket());
+            sender.setName(getName(sender.getClientSocket()));
+        }
+
+        clientList.add(sender);
 
         try {
             while (!sender.getClientSocket().isClosed()) {
@@ -91,21 +95,18 @@ public class ChatServer {
                 String line = input.readLine();
                 System.out.println(line);
 
-                if(line == null) {
+                if (line == null) {
                     System.out.println("Client " + sender.getName() + " closed, exiting...");
-
                     input.close();
                     sender.getClientSocket().close();
-                    continue;
 
-                }else if(!line.isEmpty()){
+                } else if (!line.isEmpty()) {
                     String[] parsed = line.split(" ");
                     Command command = CommandEnum.choseCommand(parsed[0]);
                     command.sendMessage(sender, parsed, this);
                 }
 
             }
-            System.out.println("Removi cliente da lista");
             clientList.remove(sender);
 
         } catch (IOException e) {
